@@ -1,0 +1,179 @@
+@model IEnumerable<UserAdminPanel.Models.User>
+
+<section class="py-4 px-2 px-md-4" style="width: 100%; min-height: 100vh; background: none;">
+    <div class="container-fluid" style="max-width: 1200px;">
+        <div class="text-center mb-5 pt-4">
+            <h2 class="fw-bold text-dark mb-2">User Management</h2>
+            <div class="text-muted small mb-4">Logged in as: <span class="text-dark fw-500">@(User.Identity?.Name ?? "Guest")</span></div>
+        </div>
+
+        <form method="post" asp-action="BulkAction" asp-controller="Home">
+            <div class="btn-toolbar-custom d-flex flex-wrap gap-2 mb-3 p-3 bg-white rounded-3 shadow-sm align-items-center justify-content-between border">
+                <div class="d-flex gap-2">
+                    <button type="submit" name="actionType" value="block" class="btn btn-sm btn-outline-warning" title="Block">
+                        <i class="bi bi-lock-fill"></i> Block
+                    </button>
+                    <button type="submit" name="actionType" value="unblock" class="btn btn-sm btn-outline-success" title="Unblock">
+                        <i class="bi bi-unlock-fill"></i> Unblock
+                    </button>
+                    <button type="submit" name="actionType" value="delete" class="btn btn-sm btn-outline-danger" title="Delete">
+                        <i class="bi bi-trash3-fill"></i> Delete
+                    </button>
+                </div>
+                
+                <div class="input-group input-group-sm" style="max-width: 300px;">
+                    <span class="input-group-text bg-light border-end-0 text-muted"><i class="bi bi-search"></i></span>
+                    <input type="text" id="userSearchInput" class="form-control border-start-0 shadow-none" placeholder="Search users...">
+                </div>
+            </div>
+
+            <div class="card rounded-3 shadow-sm border overflow-hidden bg-white mb-5">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0 custom-table" style="font-size: 14px;">
+                        <thead class="bg-light border-bottom">
+                            <tr>
+                                <th class="text-center" style="width: 56px; padding: 1rem 1.25rem;">
+                                    <input type="checkbox" id="selectAll-header" class="form-check-input border-secondary">
+                                </th>
+                                <th class="fw-600 text-dark">Name</th>
+                                <th class="fw-600 text-dark">
+                                    Email 
+                                    <i class="bi bi-arrow-down" style="font-size: 10px; opacity: 0.6;"></i>
+                                </th>
+                                <th class="fw-600 text-dark">Status</th>
+                                <th class="fw-600 text-dark">Last login</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var user in Model)
+                            {
+                                <tr class="border-bottom hover-row">
+                                    <td class="text-center" style="width: 56px; padding: 1rem 1.25rem;">
+                                        <input type="checkbox" name="selectedUserIds" value="@user.Id" class="form-check-input user-checkbox border-secondary">
+                                    </td>
+                                    <td style="padding: 1rem 1.25rem;">
+                                        <div class="fw-600 text-dark mb-1">@user.Name</div>
+                                        <small class="text-muted">@user.RegistrationTime.ToLocalTime().ToString("MMM dd, yyyy")</small>
+                                    </td>
+                                    <td class="text-muted" style="padding: 1rem 1.25rem;">@user.Email</td>
+                                    <td style="padding: 1rem 1.25rem;">
+                                        @if (user.Status == UserAdminPanel.Models.UserStatus.Active)
+                                        {
+                                            <span class="badge bg-success-subtle text-success border border-success" style="font-size: 11px; font-weight: 500; padding: 4px 10px;">Active</span>
+                                        }
+                                        else if (user.Status == UserAdminPanel.Models.UserStatus.Blocked)
+                                        {
+                                            <span class="badge bg-danger-subtle text-danger border border-danger" style="font-size: 11px; font-weight: 500; padding: 4px 10px;">Blocked</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-secondary-subtle text-secondary border border-secondary" style="font-size: 11px; font-weight: 500; padding: 4px 10px;">Unverified</span>
+                                        }
+                                    </td>
+                                    <td style="padding: 1rem 1.25rem;">
+                                        @{
+                                            var now = DateTime.Now.Date;
+                                            var loginCounts = new int[7];
+                                            if (user.LoginTimestamps != null)
+                                            {
+                                                foreach (var ts in user.LoginTimestamps)
+                                                {
+                                                    var diff = (now - ts.ToLocalTime().Date).Days;
+                                                    if (diff >= 0 && diff < 7)
+                                                    {
+                                                        loginCounts[6 - diff]++;
+                                                    }
+                                                }
+                                            }
+                                        }
+                                        <div class="d-flex gap-1 mb-2">
+                                            @for (int i = 0; i < 7; i++)
+                                            {
+                                                var count = loginCounts[i];
+                                                var intensity = count > 0 ? (count > 2 ? "#1976d2" : "#64b5f6") : "#e3f2fd";
+                                                var titleDate = now.AddDays(i - 6).ToString("MMM dd");
+                                                <div style="width: 6px; height: 24px; background-color: @intensity; border-radius: 2px;" title="@titleDate: @count logins"></div>
+                                            }
+                                        </div>
+                                        <small class="text-muted">@(user.LastLoginTime?.ToLocalTime().ToString("MMMM dd, yyyy HH:mm") ?? "Never logged in")</small>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </form>
+    </div>
+</section>
+
+<style>
+    .hover-row:hover {
+        background-color: #f8f9fa !important;
+    }
+    
+    .btn-toolbar-custom {
+        border: 1px solid #e9ecef;
+    }
+    
+    .fw-600 {
+        font-weight: 600;
+    }
+    
+    .text-white-50 {
+        color: rgba(255, 255, 255, 0.7);
+    }
+    
+    .fw-500 {
+        font-weight: 500;
+    }
+
+    .custom-table th,
+    .custom-table td {
+        padding: 1rem 1.25rem;
+        vertical-align: middle;
+        border-top: 0;
+    }
+
+    .custom-table thead th {
+        padding-top: 1.2rem;
+        padding-bottom: 1.2rem;
+    }
+
+    .custom-table tbody tr {
+        border-top: 1px solid #edf2f7;
+    }
+
+    .custom-table tbody tr:hover {
+        background-color: #fafbfc !important;
+    }
+</style>
+
+@section Scripts {
+    <script>
+        const selectAllHeader = document.getElementById('selectAll-header') || document.getElementById('selectAll');
+        if (selectAllHeader) {
+            selectAllHeader.addEventListener('change', function() {
+                document.querySelectorAll('.user-checkbox').forEach(cb => {
+                    const row = cb.closest('tr');
+                    if (row.style.display !== 'none') {
+                        cb.checked = this.checked;
+                    }
+                });
+            });
+        }
+
+        const searchInput = document.getElementById('userSearchInput');
+        if (searchInput) {
+            searchInput.addEventListener('input', function() {
+                const term = this.value.toLowerCase();
+                document.querySelectorAll('.custom-table tbody tr').forEach(row => {
+                    const text = row.innerText.toLowerCase();
+                    row.style.display = text.includes(term) ? '' : 'none';
+                });
+                
+                if (selectAllHeader) selectAllHeader.checked = false;
+            });
+        }
+    </script>
+}

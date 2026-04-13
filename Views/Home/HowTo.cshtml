@@ -1,0 +1,30 @@
+@{
+    ViewData["Title"] = "How To Use";
+}
+<h1>@ViewData["Title"]</h1>
+<p>Welcome to the User Administration Panel! Here is a brief overview of all the functionalities available in this web app.</p>
+
+<h3><i class="bi bi-box-arrow-in-right"></i> Account Management</h3>
+<ul>
+    <li><b>Registration:</b> Create a new account using your name, a unique email, and a password.</li>
+    <li><b>Login:</b> Access the platform securely. Your login timestamp is recorded dynamically.</li>
+    <li><b>Email Verification:</b> When an account is created, an email verification is triggered to upgrade your status from Unverified to Active.</li>
+</ul>
+
+<h3><i class="bi bi-speedometer2"></i> Dashboard Features</h3>
+<ul>
+    <li><b>Real-time Sparklines:</b> Located on the right side of the main table, sparklines display recent login intensity dynamically based on your usage history.</li>
+    <li><b>Sort Order:</b> The user list automatically sorts by placing the most recent logins at the top.</li>
+    <li><b>Fast Client-side Searching:</b> Use the search bar in the top right to instantly filter table rows by names or emails.</li>
+</ul>
+
+<h3><i class="bi bi-tools"></i> Bulk Administration Tools</h3>
+<p>The toolbar at the top left allows you to select users via checkboxes and execute bulk operations instantly:</p>
+<ul>
+    <li><b><i class="bi bi-lock-fill"></i> Block:</b> Restricts the selected users from logging in. If a user is active and gets blocked, their session is evaluated by middleware and instantly rejected on subsequent requests.</li>
+    <li><b><i class="bi bi-unlock-fill"></i> Unblock:</b> Restores access for blocked users.</li>
+    <li><b><i class="bi bi-trash3-fill"></i> Delete:</b> Physically removes the user from the database. Deleted users are free to register their email address again from scratch.</li>
+</ul>
+
+<hr />
+<p class="text-muted small">Designed securely with ASP.NET Core, PostgreSQL Entity Framework, and strict authorization layers.</p>
